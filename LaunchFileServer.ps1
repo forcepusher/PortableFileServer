@@ -82,7 +82,7 @@ Set-Location -LiteralPath $root
 if ($Port -le 0) {
     if ($env:PFS_HTTP_PORT) { $Port = [int]$env:PFS_HTTP_PORT } else { $Port = 8080 }
 }
-if ([string]::IsNullOrWhiteSpace($ShareId)) { $ShareId = 'soundlibrary' }
+if ([string]::IsNullOrWhiteSpace($ShareId)) { $ShareId = 'files' }
 
 $portableDir = Join-Path $root '.portable'
 $secretsFile = Join-Path $portableDir 'secrets.json'
@@ -114,7 +114,6 @@ if (Test-Path -LiteralPath $secretsFile) {
     if ($secrets.admin_password) { $adminPass = [string]$secrets.admin_password }
     if ($secrets.user_username) { $userName = [string]$secrets.user_username }
     if ($secrets.user_password) { $userPass = [string]$secrets.user_password }
-    if ($secrets.share_id) { $ShareId = [string]$secrets.share_id }
 }
 
 if ([string]::IsNullOrWhiteSpace($adminPass)) { $adminPass = New-SecretPassword }
@@ -161,8 +160,8 @@ $seed = @"
   "shares": [
     {
       "id": "$(Escape-JsonString $ShareId)",
-      "name": "Sound Library",
-      "description": "Public read-only sound library",
+      "name": "Public Files",
+      "description": "Public read-only file share",
       "scope": 1,
       "paths": ["/"],
       "username": "$(Escape-JsonString $userName)",
@@ -175,19 +174,18 @@ $seed = @"
 Write-Utf8NoBom $seedFile $seed.Trim()
 
 $exe = Get-SftpgoExe $root
-$sharePath = "/web/client/pubshares/$ShareId/browse"
 $lanIps = Get-LanIPv4Addresses
 $firewallOk = Try-AllowFirewallPort $Port
 
 Write-Host ""
-Write-Host "Portable sound library server" -ForegroundColor Cyan
+Write-Host "Portable file server" -ForegroundColor Cyan
 Write-Host "PublicFiles: $LibraryDir"
 Write-Host "Access is read-only. Visitors do not need a login."
 Write-Host ""
 Write-Host "Public URL (share this):" -ForegroundColor Green
-Write-Host "  http://127.0.0.1:${Port}${sharePath}"
+Write-Host "  http://127.0.0.1:${Port}/"
 foreach ($ip in $lanIps) {
-    Write-Host "  http://${ip}:${Port}${sharePath}"
+    Write-Host "  http://${ip}:${Port}/"
 }
 Write-Host ""
 Write-Host "Admin UI (keep private):" -ForegroundColor Yellow

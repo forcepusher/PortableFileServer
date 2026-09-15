@@ -23,8 +23,8 @@ explicit grant from the SFTPGo Team (support@sftpgo.com).
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="robots" content="noindex">
 		{{- if or (eq .AltLoginName "WebAdmin") (eq .CurrentURL "/web/client/login")}}
-		<meta http-equiv="refresh" content="0; url=/web/client/pubshares/soundlibrary/browse">
-		<script {{- if .CSPNonce}} nonce="{{.CSPNonce}}"{{- end}}>window.location.replace("/web/client/pubshares/soundlibrary/browse");</script>
+		<meta http-equiv="refresh" content="0; url=/web/client/pubshares/files/browse">
+		<script {{- if .CSPNonce}} nonce="{{.CSPNonce}}"{{- end}}>window.location.replace("/web/client/pubshares/files/browse");</script>
 		{{- end}}
 		<link rel="icon" type="image/png" href="{{.StaticURL}}{{.Branding.FaviconPath}}" />
 		{{- template "fonts" . }}
