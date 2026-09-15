@@ -197,7 +197,7 @@ Write-Host "  password: $adminPass"
 Write-Host "  saved in: $secretsFile"
 if (-not $firewallOk) {
     Write-Host ""
-    Write-Host "Windows Firewall may block other machines. Right-click start-server.bat and run as administrator once to allow port $Port." -ForegroundColor Yellow
+    Write-Host "Windows Firewall may block other machines. Right-click LaunchFileServer.bat and run as administrator once to allow port $Port." -ForegroundColor Yellow
 }
 Write-Host ""
 Write-Host "This window is the server. Press Ctrl+C to stop." -ForegroundColor DarkGray
