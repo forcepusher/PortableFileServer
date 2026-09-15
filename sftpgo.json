@@ -267,11 +267,11 @@
       {
         "port": 8080,
         "address": "",
-        "enable_web_admin": true,
+        "enable_web_admin": false,
         "enable_web_client": true,
         "enable_rest_api": true,
         "enabled_login_methods": 0,
-        "disabled_login_methods": 0,
+        "disabled_login_methods": 80,
         "enable_https": false,
         "certificate_file": "",
         "certificate_key_file": "",
@@ -283,8 +283,8 @@
         "proxy_allowed": [],
         "client_ip_proxy_header": "",
         "client_ip_header_depth": 0,
-        "hide_login_url": 0,
-        "render_openapi": true,
+        "hide_login_url": 2,
+        "render_openapi": false,
         "languages": [
           "en"
         ],

@@ -104,25 +104,21 @@ if (-not (Test-Path -LiteralPath $portableDir)) {
 }
 
 $adminUser = 'admin'
-$adminPass = $null
 $userName = 'library'
 $userPass = $null
 
 if (Test-Path -LiteralPath $secretsFile) {
     $secrets = Get-Content -LiteralPath $secretsFile -Raw | ConvertFrom-Json
     if ($secrets.admin_username) { $adminUser = [string]$secrets.admin_username }
-    if ($secrets.admin_password) { $adminPass = [string]$secrets.admin_password }
     if ($secrets.user_username) { $userName = [string]$secrets.user_username }
     if ($secrets.user_password) { $userPass = [string]$secrets.user_password }
 }
 
-if ([string]::IsNullOrWhiteSpace($adminPass)) { $adminPass = New-SecretPassword }
 if ([string]::IsNullOrWhiteSpace($userPass)) { $userPass = New-SecretPassword }
+$disabledAdminPass = New-SecretPassword
 
 $secretsOut = @"
 {
-  "admin_username": "$(Escape-JsonString $adminUser)",
-  "admin_password": "$(Escape-JsonString $adminPass)",
   "user_username": "$(Escape-JsonString $userName)",
   "user_password": "$(Escape-JsonString $userPass)",
   "share_id": "$(Escape-JsonString $ShareId)"
@@ -134,9 +130,9 @@ $seed = @"
 {
   "admins": [
     {
-      "status": 1,
+      "status": 0,
       "username": "$(Escape-JsonString $adminUser)",
-      "password": "$(Escape-JsonString $adminPass)",
+      "password": "$(Escape-JsonString $disabledAdminPass)",
       "permissions": ["*"]
     }
   ],
@@ -187,12 +183,6 @@ Write-Host "  http://127.0.0.1:${Port}/"
 foreach ($ip in $lanIps) {
     Write-Host "  http://${ip}:${Port}/"
 }
-Write-Host ""
-Write-Host "Admin UI (keep private):" -ForegroundColor Yellow
-Write-Host "  http://127.0.0.1:${Port}/web/admin"
-Write-Host "  username: $adminUser"
-Write-Host "  password: $adminPass"
-Write-Host "  saved in: $secretsFile"
 if (-not $firewallOk) {
     Write-Host ""
     Write-Host "Windows Firewall may block other machines. Right-click LaunchFileServer.bat and run as administrator once to allow port $Port." -ForegroundColor Yellow
@@ -203,10 +193,12 @@ Write-Host ""
 
 $env:SFTPGO_HTTPD__BINDINGS__0__PORT = "$Port"
 $env:SFTPGO_HTTPD__BINDINGS__0__ADDRESS = ''
-$env:SFTPGO_HTTPD__BINDINGS__0__ENABLE_WEB_ADMIN = 'true'
+$env:SFTPGO_HTTPD__BINDINGS__0__ENABLE_WEB_ADMIN = 'false'
 $env:SFTPGO_HTTPD__BINDINGS__0__ENABLE_WEB_CLIENT = 'true'
 $env:SFTPGO_HTTPD__BINDINGS__0__ENABLE_REST_API = 'true'
 $env:SFTPGO_HTTPD__BINDINGS__0__RENDER_OPENAPI = 'false'
+$env:SFTPGO_HTTPD__BINDINGS__0__HIDE_LOGIN_URL = '2'
+$env:SFTPGO_HTTPD__BINDINGS__0__DISABLED_LOGIN_METHODS = '80'
 $env:SFTPGO_SFTPD__BINDINGS__0__PORT = '0'
 $env:SFTPGO_FTPD__BINDINGS__0__PORT = '0'
 $env:SFTPGO_WEBDAVD__BINDINGS__0__PORT = '0'
