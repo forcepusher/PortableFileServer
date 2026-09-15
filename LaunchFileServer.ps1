@@ -65,17 +65,6 @@ function Get-LanIPv4Addresses {
     return @($addresses | Where-Object { $_ } | Select-Object -Unique)
 }
 
-function Try-AllowFirewallPort([int]$ListenPort) {
-    $ruleName = 'PortableFileServer HTTP'
-    $show = & netsh advfirewall firewall show rule name="$ruleName" 2>&1 | Out-String
-    if ($LASTEXITCODE -eq 0 -and $show -match [regex]::Escape($ruleName)) {
-        & netsh advfirewall firewall set rule name="$ruleName" new localport=$ListenPort protocol=TCP | Out-Null
-        return $LASTEXITCODE -eq 0
-    }
-    & netsh advfirewall firewall add rule name="$ruleName" dir=in action=allow protocol=TCP localport=$ListenPort profile=any | Out-Null
-    return $LASTEXITCODE -eq 0
-}
-
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location -LiteralPath $root
 
@@ -171,7 +160,6 @@ Write-Utf8NoBom $seedFile $seed.Trim()
 
 $exe = Get-SftpgoExe $root
 $lanIps = Get-LanIPv4Addresses
-$firewallOk = Try-AllowFirewallPort $Port
 
 Write-Host ""
 Write-Host "Portable file server" -ForegroundColor Cyan
@@ -182,10 +170,6 @@ Write-Host "Public URL (share this):" -ForegroundColor Green
 Write-Host "  http://127.0.0.1:${Port}/"
 foreach ($ip in $lanIps) {
     Write-Host "  http://${ip}:${Port}/"
-}
-if (-not $firewallOk) {
-    Write-Host ""
-    Write-Host "Windows Firewall may block other machines. Right-click LaunchFileServer.bat and run as administrator once to allow port $Port." -ForegroundColor Yellow
 }
 Write-Host ""
 Write-Host "This window is the server. Press Ctrl+C to stop." -ForegroundColor DarkGray
